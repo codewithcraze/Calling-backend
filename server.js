@@ -33,9 +33,9 @@ app.post('/incoming-call', (req, res) => {
     
     // Dial into the conference
     const dial = twiml.dial();
-    const conference = dial.conference(conferenceName, {
-        waitUrl: 'http://twimlets.com/holdmusic?Bucket=com.twilio.music.classical' // Optional: URL for hold music
-    });
+    // const conference = dial.conference(conferenceName, {
+    //     waitUrl: 'http://twimlets.com/holdmusic?Bucket=com.twilio.music.classical' // Optional: URL for hold music
+    // });
 
     // If you want to provide a number to call into the conference:
     const forwardToNumber = '+919084248821'; // Replace with the actual number
