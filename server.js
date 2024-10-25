@@ -28,6 +28,9 @@
     // Endpoint to handle incoming calls
 // Endpoint to handle incoming calls
 app.post('/incoming-call', (req, res) => {
+
+    console.log('got hitted');
+    
     const twiml = new twilio.twiml.VoiceResponse();
     
     twiml.say('Hello'); // Respond with "Hello"
