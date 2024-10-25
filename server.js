@@ -42,21 +42,24 @@ app.post('/incoming-call', (req, res) => {
 });
 
 // Endpoint to handle transcription
+// Endpoint to handle transcription
 app.post('/transcribe', (req, res) => {
-    const transcriptionText = req.body.TranscriptionText;
+    console.log('Transcription request received:', req.body);
+
+    const transcriptionText = req.body.TranscriptionText; // Check the correct property name
     console.log('Transcription received:', transcriptionText);
 
-    // Save the transcription to a file
-    const logEntry = `Transcription: ${transcriptionText}\nTimestamp: ${new Date().toISOString()}\n\n`;
-    fs.appendFile('transcriptions.txt', logEntry, (err) => {
-        if (err) {
-            console.error('Error saving transcription:', err);
-            return res.sendStatus(500);
-        }
-        console.log('Transcription saved to file');
-        res.sendStatus(200);
-    });
+    if (transcriptionText) {
+        // Save the transcription to a file
+        const logEntry = `Transcription: ${transcriptionText}\nTimestamp: ${new Date().toISOString()}\n\n`;
+        console.log(logEntry);
+        res.send('Working');
+    } else {
+        console.error('No transcription text received');
+        res.sendStatus(400); // Bad request if there's no transcription
+    }
 });
+
 
 // Endpoint to make an outgoing call
 app.post('/make-call', async (req, res) => {
