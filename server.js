@@ -24,41 +24,31 @@ app.get('/', (req, res) => {
 
 // Endpoint to handle incoming calls
 app.post('/incoming-call', (req, res) => {
-    console.log('Incoming call received');
-
     const twiml = new twilio.twiml.VoiceResponse();
-    twiml.say('Please leave a message after the beep.');
-
-    // Record the user's voice
-    twiml.record({
-        transcribe: true,
-        transcribeCallback: '/transcribe', // Set the callback URL for transcription
-        maxLength: 120, // Max length of recording
-        action: '/handle-recording', // Callback after recording
+    
+    // Create a new conference
+    const conferenceName = 'MyConference';
+    
+    twiml.say('Welcome to the call. Please wait while we connect you to the conference.');
+    
+    // Dial into the conference
+    const dial = twiml.dial();
+    const conference = dial.conference(conferenceName, {
+        waitUrl: 'http://twimlets.com/holdmusic?Bucket=com.twilio.music.classical' // Optional: URL for hold music
     });
+
+    // If you want to provide a number to call into the conference:
+    const forwardToNumber = '+919084248821'; // Replace with the actual number
+    dial.number(forwardToNumber); // This will add the number to the conference
 
     res.type('text/xml');
     res.send(twiml.toString());
 });
 
+
 // Endpoint to handle transcription
 // Endpoint to handle transcription
-app.post('/transcribe', (req, res) => {
-    console.log('Transcription request received:', req.body);
 
-    const transcriptionText = req.body.TranscriptionText; // Check the correct property name
-    console.log('Transcription received:', transcriptionText);
-
-    if (transcriptionText) {
-        // Save the transcription to a file
-        const logEntry = `Transcription: ${transcriptionText}\nTimestamp: ${new Date().toISOString()}\n\n`;
-        console.log(logEntry);
-        res.send('Working');
-    } else {
-        console.error('No transcription text received');
-        res.sendStatus(400); // Bad request if there's no transcription
-    }
-});
 
 
 // Endpoint to make an outgoing call
