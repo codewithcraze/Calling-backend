@@ -17,6 +17,6 @@
     "express": "^4.21.1",
     "mongoose": "^8.7.2",
     "twilio": "^5.3.5",
-    "@vercel/node": "^1.0.0"  // Add this line for Vercel
+    "@vercel/node": "^1.0.0"
   }
 }
