@@ -30,12 +30,7 @@
 app.post('/incoming-call', (req, res) => {
     const twiml = new twilio.twiml.VoiceResponse();
     
-    // Number to forward the call to
-    const forwardToNumber = '+919084248821'; // Replace with the actual number
-
-    twiml.say('Welcome to the call. Please wait while we connect you.');
-    const dial = twiml.dial();
-    dial.number(forwardToNumber); // Forward to the specified number
+    twiml.say('Hello'); // Respond with "Hello"
 
     res.type('text/xml');
     res.send(twiml.toString());
