@@ -92,7 +92,7 @@ app.get('/incoming-call', (req, res) => {
             const call = await client.calls.create({
                 to: toNumber,
                 from: process.env.TWILIO_PHONE_NUMBER,
-                url: `${req.protocol}://${req.get('host')}/incoming-call`, // URL to handle the call
+                url: `https://demo.twilio.com/docs/voice.xml`, // URL to handle the call
             });
             console.log('Call initiated:', call.sid);
             res.send(`Call initiated to ${toNumber}`);
