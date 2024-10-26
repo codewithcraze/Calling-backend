@@ -18,24 +18,30 @@ const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const client = twilio(accountSid, authToken);
 
-// Update with your own phone number in E.164 format
-const MODERATOR = '+917037913778';
-
-
 // Database Connection
-
-
 (async() => {
-    const connection = await mongoose.connect('mongodb+srv://ritika4221:BtvlDGd2g2i5zkbL@cluster0.zdzud.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0');
-    if(connection){
-        console.log("Connected to Database");
-    }else{
-        console.log("There is some Error");
+    try {
+        const connection = await mongoose.connect("mongodb+srv://ritika4221:BtvlDGd2g2i5zkbL@cluster0.zdzud.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0");
+        if(connection) {
+            console.log("Connected to Database");
+        }
+    } catch (error) {
+        console.log("Error connecting to the database", error);
     }
-})()
+})();
 
+// Define the Transcription Schema
+const transcriptionSchema = new mongoose.Schema({
+    recordingSid: { type: String, required: true },
+    callSid: { type: String, required: true },
+    transcriptionText: { type: Object, required: true },
+    createdAt: { type: Date, default: Date.now }
+});
 
+// Create the Transcription model
+const Transcription = mongoose.model('Transcription', transcriptionSchema);
 
+// Routes
 app.get('/', (req, res) => {
     res.send('Hello World');
 });
@@ -63,7 +69,7 @@ app.post('/incoming-call', (req, res) => {
 app.post('/recording-completed', async (req, res) => {
     const recordingUrl = req.body.RecordingUrl;
     const callSid = req.body.CallSid;
-    const recordingSid = req.body.RecordingSid; // Get RecordingSid
+    const recordingSid = req.body.RecordingSid;
 
     console.log('Incoming request:', req.body);
 
@@ -77,17 +83,31 @@ app.post('/recording-completed', async (req, res) => {
         console.log('Recording info saved. Fetching transcript...');
 
         // Fetch the transcription using Twilio's Transcripts API
-        const transcriptResponse = await axios.get(`https://intelligence.twilio.com/v2/Transcripts?SourceSid=${recordingSid}`, {
+        const transcriptResponse = await axios.get(`https://intelligence.twilio.com/v2/Transcripts?SourceSid=${recordingSid}&PageSize=50&Page=0`, {
             auth: {
                 username: accountSid,
                 password: authToken
             }
         });
 
-        // Log and send the transcription
-        const transcription = transcriptResponse.data;
-        console.log('Transcription fetched:', transcription);
-        res.send(`Recording info saved. Transcription: ${JSON.stringify(transcription)}`);
+        // Log and store the transcription
+        const transcriptionData = transcriptResponse.data;
+        console.log('Transcription fetched:', transcriptionData);
+
+        // Check if there are transcripts
+
+            // Save the transcription to the database
+            const newTranscription = new Transcription({
+                recordingSid: recordingSid,
+                callSid: callSid,
+                transcriptionText: transcriptionData
+            });
+
+            await newTranscription.save();
+
+            console.log('Transcription saved to the database.');
+            res.send(`Recording info saved. Transcription: ${JSON.stringify(fullTranscription)}`);
+      
 
     } catch (error) {
         console.error('Error fetching transcription:', error);
