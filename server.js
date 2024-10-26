@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const axios = require('axios'); // Import axios to make HTTP requests
 require('dotenv').config();
-
+const mongoose = require('mongoose');
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -20,6 +20,21 @@ const client = twilio(accountSid, authToken);
 
 // Update with your own phone number in E.164 format
 const MODERATOR = '+917037913778';
+
+
+// Database Connection
+
+
+(async() => {
+    const connection = await mongoose.connect(process.env.MONGODB_URI);
+    if(connection){
+        console.log("Connected to Database");
+    }else{
+        console.log("There is some Error");
+    }
+})()
+
+
 
 app.get('/', (req, res) => {
     res.send('Hello World');
