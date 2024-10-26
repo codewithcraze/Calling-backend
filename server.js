@@ -103,6 +103,9 @@ app.post('/recording-completed', async (req, res) => {
                 transcriptionText: transcriptionData
             });
 
+            console.log(newTranscription);
+
+        
             await newTranscription.save();
 
             console.log('Transcription saved to the database.');
