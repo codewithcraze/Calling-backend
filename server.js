@@ -67,21 +67,36 @@ app.post('/incoming-call', (req, res) => {
 // Webhook for recording completion
 app.post('/recording-completed', async (req, res) => {
     const recordingUrl = req.body.RecordingUrl;
-    const callSid = req.body.CallSid; // Call SID from Twilio
+    const callSid = req.body.CallSid;
 
-    // Transcribe the recording here or use Twilio's transcription service
-    const transcription = await transcribeRecording(recordingUrl);
+    // Log the incoming request to debug
+    console.log('Incoming request:', req.body);
 
-    // Save transcription to MongoDB
-    const newTranscription = new Transcription({
-        callSid,
-        recordingUrl,
-        transcriptionText: transcription,
-    });
-    await newTranscription.save();
+    // Check if recordingUrl is defined
+    if (!recordingUrl) {
+        console.error('Recording URL is undefined.');
+        return res.status(400).send('Recording URL is required.');
+    }
 
-    res.send('Transcription saved successfully.');
+    // Transcribe the recording
+    try {
+        const transcription = await transcribeRecording(recordingUrl);
+
+        // Save transcription to MongoDB
+        const newTranscription = new Transcription({
+            callSid,
+            recordingUrl,
+            transcriptionText: transcription,
+        });
+        await newTranscription.save();
+
+        res.send('Transcription saved successfully.');
+    } catch (error) {
+        console.error('Error during transcription:', error);
+        res.status(500).send('Error during transcription: ' + error.message);
+    }
 });
+
 
 // Transcribe the recording
 async function transcribeRecording(recordingUrl) {
