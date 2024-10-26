@@ -25,14 +25,14 @@ const MODERATOR = '+917037913778';
 // Database Connection
 
 
-// (async() => {
-//     const connection = await mongoose.connect(process.env.MONGODB_URI);
-//     if(connection){
-//         console.log("Connected to Database");
-//     }else{
-//         console.log("There is some Error");
-//     }
-// })()
+(async() => {
+    const connection = await mongoose.connect('mongodb+srv://ritika4221:BtvlDGd2g2i5zkbL@cluster0.zdzud.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0');
+    if(connection){
+        console.log("Connected to Database");
+    }else{
+        console.log("There is some Error");
+    }
+})()
 
 
 
