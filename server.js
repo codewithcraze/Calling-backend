@@ -122,13 +122,13 @@ app.post('/make-call', async (req, res) => {
         const call = await client.calls.create({
             to: toDial,
             from: process.env.TWILIO_PHONE_NUMBER,
-            url: `https://calling-backend-one.vercel.app/incoming-call`, // Your actual URL
-            statusCallback: `https://calling-backend-one.vercel.app/recording-completed`, // Recording callback
+            url: `https://calling-backend-sigma.vercel.app/incoming-call`, // Your actual URL
+            statusCallback: `https://calling-backend-sigma.vercel.app/recording-completed`, // Recording callback
             statusCallbackEvent: ['completed'],
             record: true, // Enable call recording
             transcribe: true, // Enable transcription
             transcribeCallbackEvent: ['completed'],
-            transcribeCallback: `https://calling-backend-one.vercel.app/transcription-completed` // Transcription callback
+            transcribeCallback: `https://calling-backend-sigma.vercel.app/transcription-completed` // Transcription callback
         });
 
         console.log('Call initiated:', call.sid);
