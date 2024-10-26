@@ -2,7 +2,7 @@ const express = require('express');
 const twilio = require('twilio');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const mongoose = require('mongoose');
+const axios = require('axios'); // Import axios to make HTTP requests
 require('dotenv').config();
 
 const app = express();
@@ -17,26 +17,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const client = twilio(accountSid, authToken);
-
-// Connect to MongoDB
-// (async () => {
-//     try {
-//         await mongoose.connect(process.env.MONGODB_URI);
-//         console.log('Connected to MongoDB');
-//     } catch (error) {
-//         console.error('MongoDB connection error:', error);
-//     }
-// })();
-
-// // Define a schema for call transcriptions
-// const transcriptionSchema = new mongoose.Schema({
-//     callSid: String,
-//     recordingUrl: String,
-//     transcriptionText: String,
-//     createdAt: { type: Date, default: Date.now }
-// });
-
-// const Transcription = mongoose.model('Transcription', transcriptionSchema);
 
 // Update with your own phone number in E.164 format
 const MODERATOR = '+917037913778';
@@ -68,6 +48,7 @@ app.post('/incoming-call', (req, res) => {
 app.post('/recording-completed', async (req, res) => {
     const recordingUrl = req.body.RecordingUrl;
     const callSid = req.body.CallSid;
+    const recordingSid = req.body.RecordingSid; // Get RecordingSid
 
     console.log('Incoming request:', req.body);
 
@@ -78,18 +59,24 @@ app.post('/recording-completed', async (req, res) => {
     }
 
     try {
-        // Save recording info to MongoDB without transcription for now
-        // const newTranscription = new Transcription({
-        //     callSid,
-        //     recordingUrl,
-        //     transcriptionText: 'Transcription not available yet',
-        // });
-        // await newTranscription.save();
+        console.log('Recording info saved. Fetching transcript...');
 
-        res.send('Recording info saved, transcription will follow.');
+        // Fetch the transcription using Twilio's Transcripts API
+        const transcriptResponse = await axios.get(`https://intelligence.twilio.com/v2/Transcripts?SourceSid=${recordingSid}`, {
+            auth: {
+                username: accountSid,
+                password: authToken
+            }
+        });
+
+        // Log and send the transcription
+        const transcription = transcriptResponse.data;
+        console.log('Transcription fetched:', transcription);
+        res.send(`Recording info saved. Transcription: ${JSON.stringify(transcription)}`);
+
     } catch (error) {
-        console.error('Error saving recording:', error);
-        res.status(500).send('Error saving recording: ' + error.message);
+        console.error('Error fetching transcription:', error);
+        res.status(500).send('Error fetching transcription: ' + error.message);
     }
 });
 
@@ -102,12 +89,6 @@ app.post('/transcription-completed', async (req, res) => {
     }
 
     try {
-        // Update transcription text in MongoDB
-        // await Transcription.findOneAndUpdate(
-        //     { callSid: RecordingSid },
-        //     { transcriptionText: TranscriptionText }
-        // );
-
         console.log(TranscriptionText);
 
         res.send('Transcription updated successfully.');
@@ -131,6 +112,7 @@ app.post('/make-call', async (req, res) => {
             statusCallbackEvent: ['completed'],
             record: true, // Enable call recording
             transcribe: true, // Enable transcription
+            transcribeCallbackEvent: ['completed'],
             transcribeCallback: `https://calling-backend-one.vercel.app/transcription-completed` // Transcription callback
         });
 
