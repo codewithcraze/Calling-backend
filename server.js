@@ -21,7 +21,7 @@ const VoiceResponse = require('twilio').twiml.VoiceResponse;
 
 // Connect to MongoDB
 (async() => {
-    const connection = await mongoose.connect('mongodb+srv://codewithdeepakin:codewithdeepakin@cluster0.t02huib.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0');
+    const connection = await mongoose.connect('mongodb://deepak99:deepakk%405869@44.241.239.122:27017/?authSource=admin');
     if(connection){
         console.log('connected to database');
     }else{
