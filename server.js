@@ -20,10 +20,16 @@ const client = twilio(accountSid, authToken);
 const VoiceResponse = require('twilio').twiml.VoiceResponse;
 
 // Connect to MongoDB
-mongoose.connect('mongodb+srv://codewithdeepakin:codewithdeepakin@cluster0.t02huib.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-});
+(async() => {
+    const connection = await mongoose.connect('mongodb+srv://codewithdeepakin:codewithdeepakin@cluster0.t02huib.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0');
+    if(connection){
+        console.log('connected to database');
+    }else{
+        console.log("There is some error");
+    }
+})()
+
+// mongoose.connect('mongodb+srv://codewithdeepakin:codewithdeepakin@cluster0.t02huib.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')/;
 
 // Define a schema for call transcriptions
 const transcriptionSchema = new mongoose.Schema({
