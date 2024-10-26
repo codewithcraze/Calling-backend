@@ -79,12 +79,12 @@ app.post('/recording-completed', async (req, res) => {
 
     try {
         // Save recording info to MongoDB without transcription for now
-        const newTranscription = new Transcription({
-            callSid,
-            recordingUrl,
-            transcriptionText: 'Transcription not available yet',
-        });
-        await newTranscription.save();
+        // const newTranscription = new Transcription({
+        //     callSid,
+        //     recordingUrl,
+        //     transcriptionText: 'Transcription not available yet',
+        // });
+        // await newTranscription.save();
 
         res.send('Recording info saved, transcription will follow.');
     } catch (error) {
@@ -103,10 +103,12 @@ app.post('/transcription-completed', async (req, res) => {
 
     try {
         // Update transcription text in MongoDB
-        await Transcription.findOneAndUpdate(
-            { callSid: RecordingSid },
-            { transcriptionText: TranscriptionText }
-        );
+        // await Transcription.findOneAndUpdate(
+        //     { callSid: RecordingSid },
+        //     { transcriptionText: TranscriptionText }
+        // );
+
+        console.log(TranscriptionText);
 
         res.send('Transcription updated successfully.');
     } catch (error) {
