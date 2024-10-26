@@ -17,19 +17,16 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const client = twilio(accountSid, authToken);
-const VoiceResponse = require('twilio').twiml.VoiceResponse;
 
 // Connect to MongoDB
-(async() => {
-    const connection = await mongoose.connect('mongodb+srv://codewithdeepakin:codewithdeepakin@cluster0.t02huib.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0');
-    if(connection){
-        console.log('connected to database');
-    }else{
-        console.log("There is some error");
+(async () => {
+    try {
+        await mongoose.connect(process.env.MONGODB_URI);
+        console.log('Connected to MongoDB');
+    } catch (error) {
+        console.error('MongoDB connection error:', error);
     }
-})()
-
-// mongoose.connect('mongodb+srv://codewithdeepakin:codewithdeepakin@cluster0.t02huib.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')/;
+})();
 
 // Define a schema for call transcriptions
 const transcriptionSchema = new mongoose.Schema({
@@ -53,7 +50,7 @@ app.post('/incoming-call', (req, res) => {
     const twiml = new twilio.twiml.VoiceResponse();
 
     // Get the number to dial from the request
-    const toNumber = "+919084248821"; // Assuming you pass the number in the request body
+    const toNumber = "+919084248821"; // Replace with dynamic number if needed
 
     // Welcome message
     twiml.say('Welcome to the call. Connecting you now.');
@@ -72,8 +69,8 @@ app.post('/recording-completed', async (req, res) => {
     const recordingUrl = req.body.RecordingUrl;
     const callSid = req.body.CallSid; // Call SID from Twilio
 
-    // Optionally, transcribe the recording here or use Twilio's transcription service
-    const transcription = await transcribeRecording(recordingUrl); // Implement this function
+    // Transcribe the recording here or use Twilio's transcription service
+    const transcription = await transcribeRecording(recordingUrl);
 
     // Save transcription to MongoDB
     const newTranscription = new Transcription({
@@ -86,9 +83,8 @@ app.post('/recording-completed', async (req, res) => {
     res.send('Transcription saved successfully.');
 });
 
-// Transcribe the recording (using a placeholder function)
+// Transcribe the recording
 async function transcribeRecording(recordingUrl) {
-    // Call Twilio's transcription API
     const transcription = await client.transcriptions.create({
         recordingSid: recordingUrl.split('/').pop(), // Extract recording SID from the URL
     });
@@ -97,16 +93,16 @@ async function transcribeRecording(recordingUrl) {
 
 // Endpoint to make an outgoing call
 app.post('/make-call', async (req, res) => {
-    const { countryCode, phoneNumber, toNumber } = req.body; // The number to dial
-    const toDial = toNumber || "+" + countryCode + phoneNumber; // Use toNumber if provided
+    const { countryCode, phoneNumber, toNumber } = req.body;
+    const toDial = toNumber || "+" + countryCode + phoneNumber;
 
     try {
         const call = await client.calls.create({
             to: toDial,
             from: process.env.TWILIO_PHONE_NUMBER,
             url: `https://calling-backend-one.vercel.app/incoming-call`, // Replace with your actual URL
-            statusCallback: `https://calling-backend-one.vercel.app/recording-completed`, // Add a callback URL if needed
-            statusCallbackEvent: ['completed'], // Trigger callback only when call is completed
+            statusCallback: `https://calling-backend-one.vercel.app/recording-completed`, // Callback URL
+            statusCallbackEvent: ['completed'],
         });
         console.log('Call initiated:', call.sid);
         res.send(`Call initiated to ${toDial}`);
