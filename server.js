@@ -69,7 +69,6 @@ app.post('/recording-completed', async (req, res) => {
     const recordingUrl = req.body.RecordingUrl;
     const callSid = req.body.CallSid;
 
-    // Log the incoming request to debug
     console.log('Incoming request:', req.body);
 
     // Check if recordingUrl is defined
@@ -78,33 +77,43 @@ app.post('/recording-completed', async (req, res) => {
         return res.status(400).send('Recording URL is required.');
     }
 
-    // Transcribe the recording
     try {
-        const transcription = await transcribeRecording(recordingUrl);
-
-        // Save transcription to MongoDB
+        // Save recording info to MongoDB without transcription for now
         const newTranscription = new Transcription({
             callSid,
             recordingUrl,
-            transcriptionText: transcription,
+            transcriptionText: 'Transcription not available yet',
         });
         await newTranscription.save();
 
-        res.send('Transcription saved successfully.');
+        res.send('Recording info saved, transcription will follow.');
     } catch (error) {
-        console.error('Error during transcription:', error);
-        res.status(500).send('Error during transcription: ' + error.message);
+        console.error('Error saving recording:', error);
+        res.status(500).send('Error saving recording: ' + error.message);
     }
 });
 
+// Webhook for transcription completion
+app.post('/transcription-completed', async (req, res) => {
+    const { TranscriptionText, RecordingSid } = req.body;
 
-// Transcribe the recording
-async function transcribeRecording(recordingUrl) {
-    const transcription = await client.transcriptions.create({
-        recordingSid: recordingUrl.split('/').pop(), // Extract recording SID from the URL
-    });
-    return transcription.transcriptionText; // Adapt this as needed
-}
+    if (!TranscriptionText) {
+        return res.status(400).send('No transcription text found.');
+    }
+
+    try {
+        // Update transcription text in MongoDB
+        await Transcription.findOneAndUpdate(
+            { callSid: RecordingSid },
+            { transcriptionText: TranscriptionText }
+        );
+
+        res.send('Transcription updated successfully.');
+    } catch (error) {
+        console.error('Error updating transcription:', error);
+        res.status(500).send('Error updating transcription: ' + error.message);
+    }
+});
 
 // Endpoint to make an outgoing call
 app.post('/make-call', async (req, res) => {
@@ -115,11 +124,14 @@ app.post('/make-call', async (req, res) => {
         const call = await client.calls.create({
             to: toDial,
             from: process.env.TWILIO_PHONE_NUMBER,
-            url: `https://calling-backend-one.vercel.app/incoming-call`, // Replace with your actual URL
-            statusCallback: `https://calling-backend-one.vercel.app/recording-completed`, // Callback URL
+            url: `https://https://calling-backend-one.vercel.app/incoming-call`, // Your actual URL
+            statusCallback: `https://https://calling-backend-one.vercel.app/recording-completed`, // Recording callback
             statusCallbackEvent: ['completed'],
-            record: true  
+            record: true, // Enable call recording
+            transcribe: true, // Enable transcription
+            transcribeCallback: `https://https://calling-backend-one.vercel.app/transcription-completed` // Transcription callback
         });
+
         console.log('Call initiated:', call.sid);
         res.send(`Call initiated to ${toDial}`);
     } catch (err) {
