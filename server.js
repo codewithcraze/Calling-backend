@@ -19,24 +19,24 @@ const authToken = process.env.TWILIO_AUTH_TOKEN;
 const client = twilio(accountSid, authToken);
 
 // Connect to MongoDB
-(async () => {
-    try {
-        await mongoose.connect(process.env.MONGODB_URI);
-        console.log('Connected to MongoDB');
-    } catch (error) {
-        console.error('MongoDB connection error:', error);
-    }
-})();
+// (async () => {
+//     try {
+//         await mongoose.connect(process.env.MONGODB_URI);
+//         console.log('Connected to MongoDB');
+//     } catch (error) {
+//         console.error('MongoDB connection error:', error);
+//     }
+// })();
 
-// Define a schema for call transcriptions
-const transcriptionSchema = new mongoose.Schema({
-    callSid: String,
-    recordingUrl: String,
-    transcriptionText: String,
-    createdAt: { type: Date, default: Date.now }
-});
+// // Define a schema for call transcriptions
+// const transcriptionSchema = new mongoose.Schema({
+//     callSid: String,
+//     recordingUrl: String,
+//     transcriptionText: String,
+//     createdAt: { type: Date, default: Date.now }
+// });
 
-const Transcription = mongoose.model('Transcription', transcriptionSchema);
+// const Transcription = mongoose.model('Transcription', transcriptionSchema);
 
 // Update with your own phone number in E.164 format
 const MODERATOR = '+917037913778';
