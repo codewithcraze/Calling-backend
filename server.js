@@ -26,56 +26,31 @@ app.get('/', (req, res) => {
     res.send('Hello World');
 });
 
-// Endpoint to handle incoming calls
+
 app.post('/incoming-call', (req, res) => {
-    // const twiml = new twilio.twiml.VoiceResponse();
-    
-    // // Create a new conference
-    // const conferenceName = 'MyConference';
-    
-    // twiml.say('Welcome to the call. Please wait while we connect you to the conference.');
-    
-    // // Dial into the conference
-    // const dial = twiml.dial();
-    // // const conference = dial.conference(conferenceName, {
-    // //     waitUrl: 'http://twimlets.com/holdmusic?Bucket=com.twilio.music.classical' // Optional: URL for hold music
-    // // });
+    const twiml = new twilio.twiml.VoiceResponse();
 
-    // // If you want to provide a number to call into the conference:
-    // const forwardToNumber = '+919084248821'; // Replace with the actual number
-    // dial.number(forwardToNumber); // This will add the number to the conference
+    // Create a new conference
+    const conferenceName = 'MyConference';
 
-    // res.type('text/xml');
-    // res.send(twiml.toString());
+    // Welcome message
+    twiml.say('Welcome to the call. Please wait while we connect you to the conference.');
 
-const twiml = new VoiceResponse();
-
-  // Start with a <Dial> verb
-  const dial = twiml.dial();
-  // If the caller is our MODERATOR, then start the conference when they
-  // join and end the conference when they leave
-  if (request.body.From == MODERATOR) {
-    dial.conference('My conference', {
-      startConferenceOnEnter: true,
-      endConferenceOnExit: true,
+    // Dial into the conference
+    const dial = twiml.dial();
+    dial.conference(conferenceName, {
+        waitUrl: 'http://twimlets.com/holdmusic?Bucket=com.twilio.music.classical', // Optional: URL for hold music
     });
-  } else {
-    // Otherwise have the caller join as a regular participant
-    dial.conference('My conference', {
-      startConferenceOnEnter: false,
-    });
-  }
 
-  // Render the response as XML in reply to the webhook request
-  response.type('text/xml');
-  response.send(twiml.toString());
-    
+    // Send the TwiML response
+    res.type('text/xml');
+    res.send(twiml.toString());
 });
 
-
-// Endpoint to handle transcription
-// Endpoint to handle transcription
-
+// Ensure that your incoming call route is set up to accept GET requests
+app.get('/incoming-call', (req, res) => {
+    res.send('This endpoint should handle the call. Please make sure to handle it properly.');
+});
 
 
 // Endpoint to make an outgoing call
