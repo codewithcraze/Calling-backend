@@ -118,6 +118,7 @@ app.post('/make-call', async (req, res) => {
             url: `https://calling-backend-one.vercel.app/incoming-call`, // Replace with your actual URL
             statusCallback: `https://calling-backend-one.vercel.app/recording-completed`, // Callback URL
             statusCallbackEvent: ['completed'],
+            record: true  
         });
         console.log('Call initiated:', call.sid);
         res.send(`Call initiated to ${toDial}`);
